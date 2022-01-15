@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<style>
+    @font-face{
+        font-family: Montserrat;
+        src: url("./font.woff");
+    }
+    body,html{
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        background: #000;
+    }
+    .content{
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        font-family: 'Montserrat', sans-serif;
+        /* color: white; */
+        /* filter: contrast(20); */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+       
+    }
+    .timeText{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Montserrat', sans-serif;
+        background: #000;
+        color: white;
+        text-align: center;
+        width: 100%;
+        height: 100%;
+        padding: 30vh 0px;
+        box-sizing: border-box;
+        filter: contrast(15);
+
+    }
+    .content p{
+        padding: 0;
+        margin: 10px 0px;
+        /* font-weight: bold; */
+    }
+    .h,.m,.s{
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        width: 30%;
+    }
+    .divide{
+        font-size: 10vw;
+        animation: show 2s 1 ease-in;
+    }
+    .show{
+        animation: show 2s 1 ease-in;
+        /* opacity: 1; */
+        
+    }
+    .hide{
+        animation: hide 2s 1 ease-in;
+    }
+
+    @media screen and (orientation:portrait) {
+        .timeText{
+            flex-direction: column;
+            font-size: 30vw;
+        }
+        .divide{
+            display: none;
+        }
+        .h,.m,.s{
+            width: 100%;
+        }
+        @keyframes show{
+            0%{ filter: blur(3vh) }
+            100%{ filter: blur(0px) }
+        }
+        @keyframes hide{ 
+            0%{filter: blur(0px);} 
+            100%{filter: blur(3vh);}
+        }
+    }
+
+    @media screen and (orientation:landscape) {
+        .timeText{
+            flex-direction: row;
+            font-size: 16vw;
+        }
+        .h,.m,.s{
+            width: 30%;
+        }
+        @keyframes show{
+            0%{ filter: blur(1.8vw) }
+            100%{ filter: blur(0px) }
+        }
+        @keyframes hide{ 
+            0%{filter: blur(0px);} 
+            100%{filter: blur(1.8vw);}
+        }
+    }
+</style>
+<body>
+    <div class="content">
+        <div class="timeText">
+            <p class="h"></p> <span class="divide">:</span>
+            <p class="m"></p> <span class="divide">:</span>
+            <p class="s"></p>
+        </div>
+</body>
+<script src="./jquery.3.6.0.min.js"></script>
+<script>
+    function getTimeInfo(){
+        let d = new Date();
+        var info = {
+            Y:d.getFullYear().toString(),
+            M:d.getMonth()+1,
+            D:d.getDay(),
+            h:d.getHours(),
+            m:d.getMinutes(),
+            s:d.getSeconds()
+        }
+        function add0(num){
+            return num < 10 ? "0"+num : num
+        }
+        info.M = add0(info.M).toString()
+        info.D = add0(info.D).toString()
+        info.h = add0(info.h).toString()
+        info.m = add0(info.m).toString()
+        info.s = add0(info.s).toString()
+        return info
+    }
+   
+    function setTimeAnimate(classMame,value,cb){
+        let dom = $(classMame)
+        dom.text(value)
+        dom.removeClass("hide")
+        dom.addClass("show")
+        dom.on("animationend",function(){
+            dom.off("animationend")
+            cb&&cb(function(hidecb){
+                dom.removeClass("show")
+                dom.addClass("hide") 
+                dom.on("animationend",function(){
+                    dom.off("animationend")
+                    hidecb&&hidecb()
+                    hidecb = null
+                    cb = null
+                    dom = null
+                })
+            });
+        })        
+    }
+    let info = getTimeInfo();
+    var hvalue = "0";
+    var mvalue = "0";
+    var svalue = "0";
+    var hhide = null;
+    var mhide = null;
+    function setTime(){
+        let info = getTimeInfo();
+        if(hvalue != info.h){
+            hvalue = info.h
+
+            hhide&&hhide(function(){
+                setTimeAnimate(".h",info.h,(fn)=>{
+                        hhide = fn
+                    })
+            });
+            if(hhide == null){
+                setTimeAnimate(".h",info.h,(fn)=>{
+                    hhide = fn
+                })
+            }
+            
+        }
+
+        if(mvalue != info.m){
+            mvalue = info.m
+            mhide && mhide(function(){
+                setTimeAnimate(".m",info.m,(fn)=>{
+                    mhide = fn
+                })
+            })
+            if(mhide == null){
+                setTimeAnimate(".m",info.m,(fn)=>{
+                    mhide = fn
+                })
+            }
+            
+        }    
+
+        setTimeAnimate(".s",info.s,(fn)=>{
+            fn(()=>{
+                setTime()
+            })
+        })
+    }
+    setTime()
+  
+</script>
+</html>
